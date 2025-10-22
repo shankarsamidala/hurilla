@@ -10,7 +10,6 @@ services:
       args:
         BUILDKIT_INLINE_CACHE: 0
     # Force platform to linux/amd64 to avoid issues on some Amazon Linux hosts
-    platform: "linux/amd64"
     container_name: horilla_web
     restart: unless-stopped
     command: >
