@@ -23,8 +23,6 @@ services:
       - .:/app:cached
       - static_volume:/app/static
       - media_volume:/app/media
-    ports:
-      - "8000:8000"
     environment:
       - DEBUG=True
       - SECRET_KEY=your-secret-key-here
