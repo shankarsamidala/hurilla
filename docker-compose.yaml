@@ -35,9 +35,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.horilla.rule=Host(`horilla.kalpas.in`)"
+      - "traefik.http.routers.horilla.tls=true"
+      - "traefik.http.routers.horilla.tls.certresolver=lets-encrypt"
       - "traefik.http.routers.horilla.entrypoints=websecure"
-      - "traefik.http.routers.horilla.tls.certresolver=myresolver"
       - "traefik.http.services.horilla.loadbalancer.server.port=8000"
+      - "traefik.docker.network=web"
     networks:
       - web
       - internal
