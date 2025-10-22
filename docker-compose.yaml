@@ -3,6 +3,8 @@ version: '3.8'
 services:
   web:
     build: .
+    # Force platform to linux/amd64 to avoid issues on some Amazon Linux hosts
+    platform: "linux/amd64"
     container_name: horilla_web
     restart: unless-stopped
     command: >
@@ -11,7 +13,9 @@ services:
              python manage.py compilemessages &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app
+      # Map current directory into container; on Amazon Linux ensure ownership by passing
+      # host UID/GID through environment variables (defaults to 1000)
+      - .:/app:cached
       - static_volume:/app/static
       - media_volume:/app/media
     ports:
@@ -19,6 +23,7 @@ services:
     environment:
       - DEBUG=True
       - SECRET_KEY=your-secret-key-here
+      # Pass host UID and GID to help with file permission issues on Amazon Linux
       - DB_ENGINE=django.db.backends.postgresql
       - DB_NAME=yourdatabase
       - DB_USER=yourusername
