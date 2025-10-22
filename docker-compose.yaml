@@ -1,6 +1,14 @@
+# BuildKit Configuration: Disable BuildKit to prevent build hangs on EC2
+# These environment variables are set in the .env file:
+# DOCKER_BUILDKIT=0
+# COMPOSE_DOCKER_CLI_BUILD=0
+
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        BUILDKIT_INLINE_CACHE: 0
     # Force platform to linux/amd64 to avoid issues on some Amazon Linux hosts
     platform: "linux/amd64"
     container_name: horilla_web
