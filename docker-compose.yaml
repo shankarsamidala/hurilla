@@ -33,6 +33,7 @@ services:
       - DB_HOST=postgres.kalpas.in
       - DB_PORT=5432
       - ALLOWED_HOSTS=localhost,127.0.0.1,horilla.kalpas.in
+      - CSRF_TRUSTED_ORIGINS=https://horilla.kalpas.in
       - TIME_ZONE=UTC
     labels:
       - "traefik.enable=true"
