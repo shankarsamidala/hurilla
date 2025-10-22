@@ -1,39 +1,48 @@
-services:
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8000:8000
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: "postgres://postgres:postgres@db:5432/horilla"
-    command: sh ./entrypoint.sh
-    volumes:
-      - ./horilla:/app/horilla
-      - ./media:/app/media
-    depends_on:
-      db:
-        condition: service_healthy
+version: '3.8'
 
-  db:
-    image: postgres:16-bullseye
-    environment:
-      POSTGRES_DB: horilla
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
+services:
+  web:
+    build: .
+    container_name: horilla_web
     restart: unless-stopped
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py compilemessages &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - horilla-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=your-secret-key-here
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=yourdatabase
+      - DB_USER=yourusername
+      - DB_PASSWORD=yourpassword
+      - DB_HOST=postgres.kalpas.in
+      - DB_PORT=5432
+      - ALLOWED_HOSTS=localhost,127.0.0.1,horilla.kalpas.in
+      - TIME_ZONE=UTC
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.horilla.rule=Host(`horilla.kalpas.in`)"
+      - "traefik.http.routers.horilla.entrypoints=websecure"
+      - "traefik.http.routers.horilla.tls.certresolver=myresolver"
+      - "traefik.http.services.horilla.loadbalancer.server.port=8000"
+    networks:
+      - web
+      - internal
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
 
 volumes:
-  horilla-data:
+  static_volume:
+  media_volume:
